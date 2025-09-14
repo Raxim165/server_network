@@ -170,8 +170,12 @@ clientPromise.then(client => {
   });
 })
 
-app.use((err, req, res) => res.status(500).send(err.message));
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).send(err.message || "Internal Server Error");
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => log(`http://127.1.0.1:${PORT}`));
+
 
