@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "build": "node src/index.js"
   },
   "dependencies": {
     "@types/express": "^5.0.2",

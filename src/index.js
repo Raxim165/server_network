@@ -27,7 +27,6 @@ app.use(cors({
   credentials: true
 }));
 
-
 app.use(async (req, res, next) => {
   try {
     const client = await clientPromise;
@@ -130,7 +129,6 @@ clientPromise.then(client => {
           }
           
           sockets.set(myUserId, ws);
-          // log(`Пользователь ${username} вошел в чат`);
           return;
         }
         
@@ -168,7 +166,6 @@ clientPromise.then(client => {
       }
 
       sockets.delete(myUserId);
-      // log(`Пользователь ${username} вышел из чата`);
     });
   });
 })
