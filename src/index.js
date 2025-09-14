@@ -22,10 +22,7 @@ const clientPromise = MongoClient.connect(process.env.DB_URI, {
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: ['http://127.0.0.1:5173', 'http://127.0.0.1:5174'],
-  credentials: true
-}));
+app.use(cors({ cors({ origin: "*" }) }));
 
 app.use(async (req, res, next) => {
   try {
@@ -177,5 +174,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => log(`http://127.1.0.1:${PORT}`));
+
 
 
