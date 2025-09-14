@@ -3,7 +3,6 @@ const cors = require("cors");
 const http = require("http");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const { nanoid } = require("nanoid");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const { MongoClient, ObjectId } = require("mongodb");
@@ -15,7 +14,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
 const sockets = new Map();
 const log = console.log;
-log(jwt)
+
 const clientPromise = MongoClient.connect(process.env.DB_URI, {
   useUnifiedTopology: true,
   maxPoolSize: 10,
@@ -37,31 +36,6 @@ app.use(async (req, res, next) => {
   } catch (err) { next(err) }
 });
 
-// аутентификация и регистрация
-// const findUserBySessionId = async (db, sessionId) => {
-//   const session = await db.collection("sessions").findOne({ sessionId });
-//   if (!session) return null;
-//   return db.collection("users").findOne({ _id: new ObjectId(session.userId) });
-// };
-
-// const auth = () => async (req, _res, next) => {
-//   const sessionId = req.cookies.sessionId;
-//   if (!sessionId) return next();
-
-//   const user = await findUserBySessionId(req.db, sessionId);
-//   req.user = user;
-//   req.sessionId = sessionId;
-//   next();
-// };
-
-// const createSession = async (db, userId) => {
-//   const sessionId = nanoid();
-//   await db.collection("sessions").insertOne({ userId, sessionId });
-//   return sessionId;
-// };
-
-// const deleteSession = async (db, sessionId) => await db.collection("sessions").deleteOne({ sessionId });
-
 app.post("/login", bodyParser.urlencoded({ extended: false }), async (req, res) => {
   const { email, password } = req.body;
   const user = await req.db.collection("users").findOne({ email });
@@ -77,13 +51,6 @@ app.post("/login", bodyParser.urlencoded({ extended: false }), async (req, res) 
   )
 
   res.json({ token, username: user.username, id: user._id });
-  // const sessionId = await createSession(req.db, user._id);
-  // res.cookie("sessionId", sessionId, {
-  //   httpOnly: true,
-  //   secure: false,
-  //   sameSite: "lax",
-  //   maxAge: 1000 * 60 * 60 * 24 * 7
-  // }).json({username: user.username, id: user._id});
 })
 
 app.post("/signup", bodyParser.urlencoded({ extended: false }), async (req, res) => {
@@ -97,15 +64,6 @@ app.post("/signup", bodyParser.urlencoded({ extended: false }), async (req, res)
   res.status(201).send("User created");
 })
 
-// Разлогинивание
-// app.get("/logout", auth(), async (req, res) => {
-//   if (req.sessionId) {
-//     await deleteSession(req.db, req.sessionId);
-//     res.clearCookie("sessionId").send("User logged out");
-//   }
-// })
-
-
 function authMiddleware(req, res, next) {
   const authHeader = req.headers["authorization"];
   log(authHeader)
@@ -114,12 +72,10 @@ function authMiddleware(req, res, next) {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) return res.sendStatus(403);
-    req.user = user; // теперь доступен { id, username }
+    req.user = user;
     next();
   });
 }
-
-
 
 app.get("/user", authMiddleware, async (req, res) => {
   const { userId } = req.query;
@@ -150,13 +106,11 @@ app.get('/messages', async (req, res) => {
 });
 
 clientPromise.then(client => {
-  // const users = client.db("social-network").collection("users");
   const messages = client.db("social-network").collection("messages");
 
   wss.on('connection', (ws) => {
     let myUserId = '';
     let recipientId = '';
-    // let username = '';
 
     ws.on('message', async (data) => {
       try {
@@ -223,3 +177,4 @@ app.use((err, req, res) => res.status(500).send(err.message));
 
 const port = 3000;
 server.listen(port, () => log(`http://127.1.0.1:${port}`));
+
