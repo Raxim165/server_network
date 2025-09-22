@@ -22,9 +22,8 @@ const clientPromise = MongoClient.connect(process.env.DB_URI, {
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ cors({
+app.use(cors({ 
   origin: "https://raxim165.github.io"
-  })
 }));
 
 app.use(async (req, res, next) => {
@@ -177,6 +176,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => log(`http://127.1.0.1:${PORT}`));
+
 
 
 
